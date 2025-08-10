@@ -1,4 +1,3 @@
-import os
 import time
 import requests
 import pandas as pd
@@ -6,14 +5,14 @@ import threading
 from flask import Flask
 
 # ===== Config =====
-DELTA_API_KEY = os.getenv("i1fFKKOR5Yk1MNpd4j70dW6Bj3xOJ0")  # Render env var me set karo
-SYMBOL = os.getenv("SYMBOL", "SOLUSD")
-RESOLUTION = os.getenv("RESOLUTION", "5m")
-EMA_SHORT = int(os.getenv("EMA_SHORT", 9))
-EMA_LONG = int(os.getenv("EMA_LONG", 21))
-POLL_INTERVAL = int(os.getenv("POLL_INTERVAL", 60))
-TELEGRAM_TOKEN = os.getenv("7290896681:AAFhqeFdiJcm1r4x8gHZhZyo09ObYNG83mU")
-TELEGRAM_CHAT_ID = os.getenv("6422526794")
+DELTA_API_KEY = "i1fFKKOR5Yk1MNpd4j70dW6Bj3xOJ0"  # <-- fixed API key
+SYMBOL = "SOLUSD"
+RESOLUTION = "5m"
+EMA_SHORT = 9
+EMA_LONG = 21
+POLL_INTERVAL = 5  # fast check in seconds
+TELEGRAM_TOKEN = "7290896681:AAFhqeFdiJcm1r4x8gHZhZyo09ObYNG83mU"
+TELEGRAM_CHAT_ID = "6422526794"
 
 last_signal = None
 
@@ -72,7 +71,7 @@ def compute_emas(df):
     df["ema_long"] = df["close"].ewm(span=EMA_LONG, adjust=False).mean()
     return df
 
-# Crossover check
+# Crossover check (live candle bhi include)
 def check_crossover(df):
     global last_signal
     if len(df) < 2:
@@ -114,8 +113,5 @@ def run_bot():
         time.sleep(POLL_INTERVAL)
 
 if __name__ == "__main__":
-    # EMA bot background thread
     threading.Thread(target=run_bot, daemon=True).start()
-
-    # Flask server run karega port 10000 pe
     app.run(host='0.0.0.0', port=10000)
