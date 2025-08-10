@@ -2,9 +2,11 @@ import os
 import time
 import requests
 import pandas as pd
+import threading
+from flask import Flask
 
 # ===== Config =====
-DELTA_API_KEY = os.getenv("i1fFKKOR5Yk1MNpd4j70dW6Bj3xOJ0")
+DELTA_API_KEY = os.getenv("i1fFKKOR5Yk1MNpd4j70dW6Bj3xOJ0")  # Render env var me set karo
 SYMBOL = os.getenv("SYMBOL", "SOLUSD")
 RESOLUTION = os.getenv("RESOLUTION", "5m")
 EMA_SHORT = int(os.getenv("EMA_SHORT", 9))
@@ -14,6 +16,13 @@ TELEGRAM_TOKEN = os.getenv("7290896681:AAFhqeFdiJcm1r4x8gHZhZyo09ObYNG83mU")
 TELEGRAM_CHAT_ID = os.getenv("6422526794")
 
 last_signal = None
+
+# Flask app
+app = Flask(__name__)
+
+@app.route("/")
+def home():
+    return "Delta EMA Bot is running!"
 
 # Resolution to seconds
 def res_to_seconds(res):
@@ -43,22 +52,16 @@ def fetch_candles(symbol, resolution, limit=100):
     if not data:
         raise ValueError("No candle data")
     df = pd.DataFrame(data)
-    # try to handle both possible time/close formats
     if 'close' not in df.columns and len(df.columns) >= 5:
-        # fallback: if response is list of arrays like Binance style
-        # assume close at index 4 and time at index 0
         df = df.iloc[:, :6]
         df.columns = ['time','open','high','low','close','volume']
     df["close"] = df["close"].astype(float)
-    # if time looks like epoch seconds or ms, try to normalize
     if df["time"].dtype == 'int64' or df["time"].dtype == 'float64':
-        # guess: if milliseconds (>=1e12), convert from ms
         if df["time"].astype(int).max() > 1_000_000_000_000:
             df["time"] = pd.to_datetime(df["time"], unit='ms')
         else:
             df["time"] = pd.to_datetime(df["time"], unit='s')
     else:
-        # try parse
         df["time"] = pd.to_datetime(df["time"])
     df = df.sort_values("time").reset_index(drop=True)
     return df
@@ -98,8 +101,8 @@ def send_telegram_alert(signal, price, candle_time):
     except Exception as e:
         print("Failed to send telegram:", e)
 
-# Main loop
-if __name__ == "__main__":
+# EMA bot loop
+def run_bot():
     print("Starting Delta EMA bot for", SYMBOL, "interval", RESOLUTION)
     while True:
         try:
@@ -109,3 +112,10 @@ if __name__ == "__main__":
         except Exception as e:
             print("Error:", e)
         time.sleep(POLL_INTERVAL)
+
+if __name__ == "__main__":
+    # EMA bot background thread
+    threading.Thread(target=run_bot, daemon=True).start()
+
+    # Flask server run karega port 10000 pe
+    app.run(host='0.0.0.0', port=10000)
