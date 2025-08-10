@@ -100,8 +100,19 @@ def send_telegram_alert(signal, price, candle_time):
     except Exception as e:
         print("Failed to send telegram:", e)
 
+# Telegram startup alert
+def send_startup_alert():
+    text = f"Delta EMA Bot started for {SYMBOL} with interval {RESOLUTION}"
+    url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
+    try:
+        requests.post(url, data={"chat_id": TELEGRAM_CHAT_ID, "text": text})
+        print("Startup alert sent:", text)
+    except Exception as e:
+        print("Failed to send startup telegram:", e)
+
 # EMA bot loop
 def run_bot():
+    send_startup_alert()  # Bot start hone pe ye message jayega
     print("Starting Delta EMA bot for", SYMBOL, "interval", RESOLUTION)
     while True:
         try:
