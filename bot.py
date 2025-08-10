@@ -4,14 +4,14 @@ import requests
 import pandas as pd
 
 # ===== Config =====
-DELTA_API_KEY = os.getenv("DELTA_API_KEY")
-SYMBOL = os.getenv("SYMBOL", "BTCUSD")
-RESOLUTION = os.getenv("RESOLUTION", "1m")
+DELTA_API_KEY = os.getenv("i1fFKKOR5Yk1MNpd4j70dW6Bj3xOJ0")
+SYMBOL = os.getenv("SYMBOL", "SOLUSD")
+RESOLUTION = os.getenv("RESOLUTION", "5m")
 EMA_SHORT = int(os.getenv("EMA_SHORT", 9))
 EMA_LONG = int(os.getenv("EMA_LONG", 21))
 POLL_INTERVAL = int(os.getenv("POLL_INTERVAL", 60))
-TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
-TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
+TELEGRAM_TOKEN = os.getenv("7290896681:AAFhqeFdiJcm1r4x8gHZhZyo09ObYNG83mU")
+TELEGRAM_CHAT_ID = os.getenv("6422526794")
 
 last_signal = None
 
